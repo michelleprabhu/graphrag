@@ -140,7 +140,6 @@ def initialize_neo4j_vector():
     top_k=3
 )
 
-        )
         logger.info("Successfully initialized Neo4j Vector")
         return neo_db
     except Exception as e:
