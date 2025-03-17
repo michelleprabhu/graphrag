@@ -37,12 +37,9 @@ st.markdown("""
         border-radius: 0.5rem;
         margin-bottom: 1rem;
     }
-    /* Hides the default input box */
-    div[data-testid="stChatInput"] {
-        display: none !important;
-    }
 </style>
 """, unsafe_allow_html=True)
+
 
 # Cache Neo4j driver to avoid repeated connections
 @st.cache_resource
