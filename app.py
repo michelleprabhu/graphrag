@@ -37,8 +37,17 @@ st.markdown("""
         border-radius: 0.5rem;
         margin-bottom: 1rem;
     }
+    /* Remove extra padding/margin from input container */
+    div[data-testid="stTextInput"] {
+        display: none !important;
+    }
+    div.stTextInput {
+        visibility: hidden;
+        height: 0px;
+    }
 </style>
 """, unsafe_allow_html=True)
+
 
 
 # Cache Neo4j driver to avoid repeated connections
