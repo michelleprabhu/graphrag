@@ -80,7 +80,7 @@ def get_gemini_llm():
             
         # Initialize Gemini Model using API Key (without Google Cloud project)
         llm = ChatGoogleGenerativeAI(
-            model="gemini-pro",
+            model="gemini-1.5-pro-latest",
             google_api_key=gemini_api_key
         )
         logger.info("Successfully initialized Gemini LLM")
@@ -125,17 +125,21 @@ def initialize_neo4j_vector():
     try:
         # Step 1: Initialize Neo4j Vector WITHOUT OpenAI
         neo_db = Neo4jVector.from_existing_graph(
-            driver=driver,
-            node_label="Document",
-            text_node_properties=["text"],  # Make sure this matches your database schema
-            retrieval_query="""
-            MATCH (n:Document) 
-            WHERE n.status = 'Completed' AND n.text CONTAINS $query 
-            RETURN n.text as text, 
-                   n.fileName as metadata_fileName,
-                   n.createdAt as metadata_createdAt
-            """,
-            top_k=5
+    driver=driver,
+    node_label="Document",
+    text_node_properties=["text"],
+    embedding=None,  # If you don’t have an embedding model, set this to None
+    embedding_node_property="embedding",  # Use the correct property name
+    retrieval_query="""
+    MATCH (n:Document) 
+    WHERE n.status = 'Completed' AND n.text CONTAINS $query 
+    RETURN n.text as text, 
+           n.fileName as metadata_fileName,
+           n.createdAt as metadata_createdAt
+    """,
+    top_k=3
+)
+
         )
         logger.info("Successfully initialized Neo4j Vector")
         return neo_db
