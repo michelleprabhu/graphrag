@@ -94,7 +94,7 @@ def get_gemini_llm():
 # Get all documents from Neo4j with caching
 @st.cache_data(ttl=300)  # Cache for 5 minutes
 def get_all_documents():
-    """Retrieve all completed documents from Neo4j."""
+    """ all completed documents from Neo4j."""
     driver = get_neo4j_driver()
     if not driver:
         return []
@@ -110,7 +110,7 @@ def get_all_documents():
             docs = [{"fileName": record["fileName"], "createdAt": record["createdAt"]} 
                    for record in result]
         
-        logger.info(f"Retrieved {len(docs)} documents from Neo4j")
+        logger.info(f"d {len(docs)} documents from Neo4j")
         return docs
     except Exception as e:
         logger.error(f"Error retrieving documents: {str(e)}")
@@ -148,7 +148,7 @@ def initialize_neo4j_vector():
         logger.error(f"Error initializing Neo4j Vector: {str(e)}")
         return None
 
-# Retrieve relevant documents with timing
+#  relevant documents with timing
 def retrieve_documents(query):
     """Retrieve relevant documents based on the query."""
     start_time = time.time()
@@ -160,17 +160,17 @@ def retrieve_documents(query):
         # Create retriever with search parameters
         retriever = neo_db.as_retriever(
             search_type="similarity",
-            search_kwargs={"k": 5, "score_threshold": 0.5}
+            search_kwargs={"k": 5, "score_threshold": 0.5}  # Ensure we get at least 5 results
         )
         
         # Get relevant documents
         docs = retriever.get_relevant_documents(query)
         
-        # Log retrieved documents
+        # Log retrieved documents for debugging
         logger.info(f"Retrieved {len(docs)} relevant documents for query: {query}")
         for i, doc in enumerate(docs):
-            logger.info(f"Document {i+1}: {doc.page_content[:300]}")  # Log first 300 chars
-        
+            logger.info(f"Document {i+1}: {doc.page_content[:500]}")  # Print first 500 chars
+
         # Log performance metrics
         elapsed_time = time.time() - start_time
         logger.info(f"Retrieved {len(docs)} documents in {elapsed_time:.2f} seconds")
@@ -217,16 +217,17 @@ def process_query(question):
         
         # Create an improved prompt with better instructions
         prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are a helpful assistant with access to a knowledge base of documents.
-            Use the following context to answer the user's question accurately and concisely.
-            If the context doesn't contain relevant information, acknowledge that and provide
-            general information if possible. Always cite your sources when referencing specific documents.
-            
-            Context:
-            {context}"""),
-            MessagesPlaceholder(variable_name="chat_history"),
-            ("human", "{question}")
-        ])
+    ("system", """You are an AI assistant with access to a knowledge base.
+    Answer questions using ONLY the provided document context.  
+    If the context does not contain relevant information, simply say:  
+    'I couldn't find information related to your query in the knowledge base.'  
+    
+    Context:
+    {context}"""),
+
+    MessagesPlaceholder(variable_name="chat_history"),
+    ("human", "{question}")
+])
         
         # Initialize chat history if it doesn't exist
         if "chat_history" not in st.session_state:
