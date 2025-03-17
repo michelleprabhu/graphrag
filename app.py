@@ -166,6 +166,11 @@ def retrieve_documents(query):
         # Get relevant documents
         docs = retriever.get_relevant_documents(query)
         
+        # Log retrieved documents
+        logger.info(f"Retrieved {len(docs)} relevant documents for query: {query}")
+        for i, doc in enumerate(docs):
+            logger.info(f"Document {i+1}: {doc.page_content[:300]}")  # Log first 300 chars
+        
         # Log performance metrics
         elapsed_time = time.time() - start_time
         logger.info(f"Retrieved {len(docs)} documents in {elapsed_time:.2f} seconds")
