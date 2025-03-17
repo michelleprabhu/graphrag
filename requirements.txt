@@ -1,0 +1,12 @@
+streamlit
+neo4j
+langchain
+langchain-google-vertexai
+langchain-neo4j
+google-generativeai
+protobuf
+pydantic
+tiktoken
+python-dotenv
+requests
+logging
