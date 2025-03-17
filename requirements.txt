@@ -1,12 +1,7 @@
 streamlit
 neo4j
 langchain
-langchain-google-vertexai
-langchain-neo4j
-google-generativeai
-protobuf
-pydantic
-tiktoken
-python-dotenv
-requests
-logging
+langchain_community
+langchain_neo4j
+langchain_google_genai
+protobuf==4.23.4
