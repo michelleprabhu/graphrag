@@ -2,7 +2,7 @@ import streamlit as st
 import os
 from neo4j import GraphDatabase
 from langchain_neo4j import Neo4jVector
-from langchain_google_vertexai import ChatVertexAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
@@ -73,12 +73,15 @@ def get_neo4j_driver():
 def get_gemini_llm():
     """Initialize and cache Google Gemini LLM."""
     try:
+        # Get Gemini API Key from secrets
         gemini_api_key = st.secrets["GEMINI_API_KEY"]
-        llm = ChatVertexAI(
-            model_name="gemini-1.5-pro", 
-            google_api_key=gemini_api_key,
-            temperature=0.7,
-            max_output_tokens=2048
+        if not gemini_api_key:
+            raise ValueError("Missing Gemini API Key in secrets!")
+            
+        # Initialize Gemini Model using API Key (without Google Cloud project)
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-pro",
+            google_api_key=gemini_api_key
         )
         logger.info("Successfully initialized Gemini LLM")
         return llm
@@ -111,7 +114,7 @@ def get_all_documents():
         logger.error(f"Error retrieving documents: {str(e)}")
         return []
 
-# Initialize Neo4j Vector with better error handling
+# Initialize Neo4j Vector without OpenAI embeddings
 @st.cache_resource
 def initialize_neo4j_vector():
     """Initialize Neo4j Vector for semantic search."""
@@ -120,20 +123,19 @@ def initialize_neo4j_vector():
         return None
 
     try:
-        # Improved initialization with more parameters
+        # Step 1: Initialize Neo4j Vector WITHOUT OpenAI
         neo_db = Neo4jVector.from_existing_graph(
             driver=driver,
             node_label="Document",
-            text_node_property="text",
-            embedding_node_property="embedding",
+            text_node_properties=["text"],  # Make sure this matches your database schema
             retrieval_query="""
             MATCH (n:Document) 
             WHERE n.status = 'Completed' AND n.text CONTAINS $query 
-            RETURN n.text as text, n.embedding as embedding, 
+            RETURN n.text as text, 
                    n.fileName as metadata_fileName,
                    n.createdAt as metadata_createdAt
             """,
-            top_k=1  # Retrieve top 5 most relevant documents
+            top_k=5
         )
         logger.info("Successfully initialized Neo4j Vector")
         return neo_db
@@ -272,7 +274,7 @@ def render_sidebar():
     st.sidebar.markdown("<div class='sub-header'>ℹ️ About</div>", unsafe_allow_html=True)
     st.sidebar.info("""
     This GraphRAG Chatbot uses Neo4j graph database for knowledge storage and 
-    Google's Gemini 1.5 Pro for natural language understanding. It can answer 
+    Google's Gemini Pro for natural language understanding. It can answer 
     questions based on the documents stored in the knowledge base.
     """)
 
