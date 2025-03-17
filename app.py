@@ -14,14 +14,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Page configuration
-st.set_page_config(
-    page_title="GraphRAG Chatbot",
-    page_icon="💬",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# Custom CSS for better UI
 st.markdown("""
 <style>
     .main-header {
@@ -44,6 +36,10 @@ st.markdown("""
         padding: 1.5rem;
         border-radius: 0.5rem;
         margin-bottom: 1rem;
+    }
+    /* Hides the default input box */
+    div[data-testid="stChatInput"] {
+        display: none !important;
     }
 </style>
 """, unsafe_allow_html=True)
